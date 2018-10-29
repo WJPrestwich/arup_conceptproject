@@ -1,0 +1,39 @@
+type Character {
+	name: String!
+	appearsIn: [Movie]
+	actor: Actor!
+	house: House
+	wand: Wand
+}
+
+type Movie {
+	title: String!
+	release_date: String
+}
+
+type Actor {
+	name: String!
+}
+
+enum House {
+	GRYFFINDOR
+	HUFFLEPUFF
+	RAVENCLAW
+	SLYTHERIN
+}
+
+type Wand {
+	wood: String!
+	core: String!
+	length: Float!
+	description: String
+}
+
+type Query {
+	character(name: String!): Character!
+	movie: Movie!
+}
+
+type Mutation {
+	createCharacter(name: String!, appearsIn: [Movie], actor: Actor!, house: House, wand: Wand): Character!
+}
