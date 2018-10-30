@@ -3,3 +3,9 @@
 README.md
 docker-compose.yml
 venv
+data
+examples
+__pycache__
+models.py
+schema_mongoengine.py
+test.py
