@@ -1,5 +1,5 @@
 import sys
-from graphene import (ObjectType, Enum, ID, String, Float, List, Field, Schema,)
+from graphene import ObjectType, Enum, ID, String, Float, List, Field, Schema
 from pymongo import MongoClient
 from itertools import combinations
 
@@ -17,6 +17,16 @@ client = MongoClient('localhost', 27017)
 db = client.harry_potter_trivia
 
 
+# ===== HELPER FUNCTIONS =====
+def fill_out(objecttype_class, d):
+    if d is None:
+        return None
+    if '_id' in d:
+        _ = d.pop('_id')
+    return objecttype_class(**d)
+
+
+# ===== OBJECTTYPE DEFINITIONS =====
 class House(Enum):
     gryffindor = "GRYFFINDOR"
     hufflepuff = "HUFFLEPUFF"
@@ -48,10 +58,26 @@ class Character(ObjectType):
     name = String(required=True)
     appears_in = List(lambda: Movie)
     actor = Field(lambda: Actor, required=True)
-    house = String()
+    house = Field(House)
     wand = Field(lambda: Wand)
 
+    def resolve_appears_in(self, info):
+        movie_list = [db.movies.find_one({'id': a}) for a in self.appears_in]
+        movie_list = [fill_out(Movie, m) for m in movie_list]
+        return movie_list
 
+    def resolve_actor(self, info):
+        this_actor = db.actors.find_one({'id': self.actor})
+        this_actor = fill_out(Actor, this_actor)
+        return this_actor
+
+    def resolve_wand(self, info):
+        this_wand = db.wands.find_one({'id': self.wand})
+        this_wand = fill_out(Wand, this_wand)
+        return this_wand
+
+
+# ===== QUERY DEFINITION =====
 class Query(ObjectType):
     wand = Field(Wand, id=ID(), wood=String(), core=String())
     actor = Field(Actor, id=ID(), name=String())
@@ -62,169 +88,33 @@ class Query(ObjectType):
         appears_in=String(), 
         actor=String(), 
         house=House(), 
-        wand_core=String(),
+        wand=String(),
         )
 
+    def res_decorator(func):
+        def wrapper(*args, **kwargs):
+            objecttype_class, db_con, args, default_id = func(*args, **kwargs)
+            if len(args):
+                return fill_out(objecttype_class, db_con.find_one(args))
+            else:
+                return fill_out(objecttype_class, db_con.find_one({'id': default_id}))
+        return wrapper
+
+    @res_decorator
     def resolve_wand(self, info, **args):
-        def fill_out(d):
-            if d is not None:
-                return Wand(
-                    id=d['id'], 
-                    wood=d['wood'], 
-                    core=d['core'], 
-                    length=d['length'], 
-                    description=d['description'],
-                    )
-            else:
-                return None
+        return Wand, db.wands, args, '1100'
 
-        if len(args):
-            return fill_out(db.wands.find_one(args))
-        else:
-            return fill_out(db.wands.find_one({'id': '1100'}))
-
+    @res_decorator
     def resolve_actor(self, info, **args):
-        def fill_out(d):
-            if d is not None:
-                return Actor(
-                    id=d['id'], 
-                    name=d['name'], 
-                    )
-            else:
-                return None
+        return Actor, db.actors, args, '1200'
 
-        if len(args):
-            return fill_out(db.actors.find_one(args))
-        else:
-            return fill_out(db.actors.find_one({'id': '1200'}))
-
+    @res_decorator
     def resolve_movie(self, info, **args):
-        def fill_out(d):
-            if d is not None:
-                return Movie(
-                    id=d['id'], 
-                    title=d['title'], 
-                    release_date=d['release_date'], 
-                    )
-            else:
-                return None
+        return Movie, db.movies, args, '1300'
 
-        if len(args):
-            return fill_out(db.movies.find_one(args))
-        else:
-            return fill_out(db.movies.find_one({'id': "1300"}))
-
+    @res_decorator
     def resolve_character(self, info, **args) :
-        def fill_out(d):
-            if d is not None:
-                return Character(
-                    id=d['id'], 
-                    name=d['name'], 
-                    appears_in=d['appears_in'], 
-                    actor=d['actor'], 
-                    house=d['house'],
-                    wand_core=d['wand_core'],
-                    )
-            else:
-                return None
-
-        if len(args):
-            return fill_out(db.characters.find_one(args))
-        else:
-            return fill_out(db.characters.find_one({'id': "1400"}))
+        return Character, db.characters, args, '1400'
     
 
 schema = Schema(query=Query)
-
-
-def setup():
-    wands = [
-        Wand(
-            id = "1100",
-            wood = "holly",
-            core = "pheonix feather",
-            length = 11,
-            description = "nice and supple",
-        ),
-    ]
-
-    actors = [
-        Actor(
-            id = "1200",
-            name = "Daniel Radcliffe"
-        ),
-    ]
-
-    movies = [
-        Movie(
-            id = "1300",
-            title = "Harry Potter and the Sorcerer's Stone",
-            release_date = "2001",
-        ),
-        Movie(
-            id = "1301",
-            title = "Harry Potter and the Chamber of Secrets",
-            release_date = "2002",
-        ),
-        Movie(
-            id = "1302",
-            title = "Harry Potter and the Prisoner of Azkaban",
-            release_date = "2004",
-        ),
-        Movie(
-            id = "1303",
-            title = "Harry Potter and the Goblet of Fire",
-            release_date = "2005",
-        ),
-        Movie(
-            id = "1304",
-            title = "Harry Potter and the Order of the Phoenix",
-            release_date = "2007",
-        ),
-        Movie(
-            id = "1305",
-            title = "Harry Potter and the Half-Blood Prince",
-            release_date = "2009",
-        ),
-        Movie(
-            id = "1306",
-            title = "Harry Potter and the Deathly Hallows: Part 1",
-            release_date = "2010",
-        ),
-        Movie(
-            id = "1307",
-            title = "Harry Potter and the Deathly Hallows: Part 2",
-            release_date = "2011",
-        ),
-    ]
-
-
-    for w in wands:
-        if not db.wands.find({'id': w.id}).count():
-            result = db.wands.insert_one({
-                "id": w.id,
-                "wood": w.wood,
-                "core": w.core,
-                "length": w.length,
-                "description": w.description,
-            })
-
-    for a in actors:
-        if not db.actors.find({'id': a.id}).count():
-            result = db.actors.insert_one({
-                "id": a.id,
-                "name": a.name,
-            })
-
-    for m in movies:
-        if not db.movies.find({'id': m.id}).count():
-            result = db.movies.insert_one({
-                "id": m.id,
-                "title": m.title,
-                "release_date": m.release_date,
-            })
-
-    # print(db.actors.find_one({'id': harrypotter_actor.id}))
-
-if __name__ == "__main__":
-    setup()

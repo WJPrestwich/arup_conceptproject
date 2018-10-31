@@ -1,5 +1,5 @@
 from flask import Flask
-from graphene import (ObjectType, String, Schema,)
+from graphene import ObjectType, String, Schema
 from flask_graphql import GraphQLView
 from schema import schema
 
