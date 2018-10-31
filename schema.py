@@ -4,12 +4,12 @@ from pymongo import MongoClient
 from itertools import combinations
 
 
-client = MongoClient('localhost', 27017)
+client = MongoClient("mongodb://mongodb:27200")
 db = client.harry_potter_trivia
 
 
 # ===== HELPER FUNCTIONS =====
-# We'll pass in a class type to instansiate our ObjectType dynamically.
+# We'll pass in a class type to instantiate our ObjectType dynamically.
 def fill_out(objecttype_class, d):
     if d is None:
         return None

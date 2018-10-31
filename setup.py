@@ -1,7 +1,7 @@
 from schema import Wand, Actor, Movie, Character
 from pymongo import MongoClient
 
-client = MongoClient('localhost', 27017)
+client = MongoClient("mongodb://mongodb:27200")
 client.drop_database('harry_potter_trivia')
 db = client.harry_potter_trivia
 
