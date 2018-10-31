@@ -30,10 +30,13 @@ type Wand {
 }
 
 type Query {
-	character(name: String!): Character!
-	movie: Movie!
+	wand(id: ID, wood: String(), core: String()): Wand!
+	actor(id: ID, name: String()): Actor!
+	movie(id: ID, title: String(), releaseDate: String()): Movie!
+	character(id: ID, name: String(), actor: String(), house: House(), wand: String()): Character!
+	characterAppearsIn(appears_in: ID!): [Character]!
 }
 
 type Mutation {
-	createCharacter(name: String!, appearsIn: [Movie], actor: Actor!, house: House, wand: Wand): Character!
+	createCharacter(name: String!, appearsIn: [ID], actor: ID!, house: House, wand: ID): Character!
 }

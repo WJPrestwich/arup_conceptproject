@@ -85,11 +85,11 @@ class Query(ObjectType):
     character = Field(Character, 
         id=ID(), 
         name=String(), 
-        appears_in=String(), 
         actor=String(), 
         house=House(), 
         wand=String(),
         )
+    character_appears_in = Field(List(Character), appears_in=ID(required=True))
 
     def res_decorator(func):
         def wrapper(*args, **kwargs):
@@ -97,6 +97,7 @@ class Query(ObjectType):
             if len(args):
                 return fill_out(objecttype_class, db_con.find_one(args))
             else:
+                # If no search parameters are given, fetch the first instance instance.
                 return fill_out(objecttype_class, db_con.find_one({'id': default_id}))
         return wrapper
 
@@ -115,6 +116,9 @@ class Query(ObjectType):
     @res_decorator
     def resolve_character(self, info, **args) :
         return Character, db.characters, args, '1400'
+
+    def resolve_character_appears_in(self, info, appears_in):
+        return [fill_out(Character, db.characters.find_one({'id': '1400'}))]
     
 
 schema = Schema(query=Query)
