@@ -1,16 +1,7 @@
 import sys
-from graphene import ObjectType, Enum, ID, String, Float, List, Field, Schema
+from graphene import ObjectType, Enum, ID, String, Float, List, Field, Mutation, Schema
 from pymongo import MongoClient
 from itertools import combinations
-
-
-# def combine_factorially(val):
-#     # print("==%s=="%(val), file=sys.stderr)
-#     for x in reversed(range(len(val.items()))):
-#         # print("==%s=="%(x+1), file=sys.stderr)
-#         comb = combinations(val, x+1) 
-#         for c in comb: yield c
-# print("==%s=="%("Hello"), file=sys.stderr)
 
 
 client = MongoClient('localhost', 27017)
@@ -18,12 +9,18 @@ db = client.harry_potter_trivia
 
 
 # ===== HELPER FUNCTIONS =====
+# We'll pass in a class type to instansiate our ObjectType dynamically.
 def fill_out(objecttype_class, d):
     if d is None:
         return None
     if '_id' in d:
         _ = d.pop('_id')
     return objecttype_class(**d)
+
+
+# This allows us to print to the Flask std out.
+def debug_print(msg):
+    print("==%s=="%(msg), file=sys.stderr)
 
 
 # ===== OBJECTTYPE DEFINITIONS =====
@@ -91,13 +88,15 @@ class Query(ObjectType):
         )
     character_appears_in = Field(List(Character), appears_in=ID(required=True))
 
+    # We'll use a decorator here to cut down on similar code.
     def res_decorator(func):
         def wrapper(*args, **kwargs):
             objecttype_class, db_con, args, default_id = func(*args, **kwargs)
             if len(args):
+                # If given some arguments, search based on those.
                 return fill_out(objecttype_class, db_con.find_one(args))
             else:
-                # If no search parameters are given, fetch the first instance instance.
+                # If no search parameters are given, fetch the first instance.
                 return fill_out(objecttype_class, db_con.find_one({'id': default_id}))
         return wrapper
 
@@ -118,7 +117,49 @@ class Query(ObjectType):
         return Character, db.characters, args, '1400'
 
     def resolve_character_appears_in(self, info, appears_in):
-        return [fill_out(Character, db.characters.find_one({'id': '1400'}))]
+        temp = db.characters.find({'appears_in': appears_in})
+        chars = [fill_out(Character, t) for t in temp]
+        return chars
     
 
-schema = Schema(query=Query)
+# ===== MUTATION DEFINITIONS =====
+class CreateCharacter(Mutation):
+    class Arguments:
+        name = String()
+        appears_in = List(ID)
+        actor = ID()
+        house = House()
+        wand = ID()
+
+    character = Field(lambda: Character)
+
+    def mutate(self, info, name, appears_in, actor, house=None, wand=None):
+        # This character's id is equal to the last character's id plus one.
+        last = db.characters.find_one(sort=[("id", -1)])
+        debug_print(last)
+        _id = str(int(last['id'])+1)
+
+        result = db.characters.insert_one({
+            "id": _id,
+            "name": name,
+            "appears_in": appears_in,
+            "actor": actor,
+            "house": house,
+            "wand": wand,
+        })
+
+        character = Character(
+            id = _id,
+            name = name,
+            appears_in = appears_in,
+            actor = actor,
+            house = house,
+            wand = wand,
+        )
+        return CreateCharacter(character=character)
+
+class Mutations(ObjectType):
+    create_character = CreateCharacter.Field()
+
+
+schema = Schema(query=Query, mutation=Mutations)

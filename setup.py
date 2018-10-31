@@ -2,6 +2,7 @@ from schema import Wand, Actor, Movie, Character
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)
+client.drop_database('harry_potter_trivia')
 db = client.harry_potter_trivia
 
 def setup():
@@ -13,12 +14,42 @@ def setup():
             length = 11,
             description = "nice and supple",
         ),
+        Wand(
+            id = "1101",
+            wood = "ash",
+            core = "unicorn tail hair",
+            length = 12,
+            description = "broken",
+        ),
+        Wand(
+            id = "1102",
+            wood = "vine wood",
+            core = "dragon heartstring",
+            length = 10.25,
+            description = None,
+        ),
     ]
 
     actors = [
         Actor(
             id = "1200",
             name = "Daniel Radcliffe"
+        ),
+        Actor(
+            id = "1201",
+            name = "Rupert Grint"
+        ),
+        Actor(
+            id = "1202",
+            name = "Emma Watson"
+        ),
+        Actor(
+            id = "1203",
+            name = "Ray Fearon"
+        ),
+        Actor(
+            id = "1204",
+            name = "Toby Jones"
         ),
     ]
 
@@ -73,6 +104,38 @@ def setup():
             actor= "1200",
             house = "GRYFFINDOR",
             wand = "1100",
+        ),
+        Character(
+            id = "1401",
+            name = "Ronald Weasley",
+            appears_in = ["1300","1301","1302","1303","1304","1305","1306","1307",],
+            actor= "1201",
+            house = "GRYFFINDOR",
+            wand = "1101",
+        ),
+        Character(
+            id = "1402",
+            name = "Hermione Granger",
+            appears_in = ["1300","1301","1302","1303","1304","1305","1306","1307",],
+            actor= "1202",
+            house = "GRYFFINDOR",
+            wand = "1102",
+        ),
+        Character(
+            id = "1403",
+            name = "Firenze (the centaur)",
+            appears_in = ["1300","1304","1305","1306","1307",],
+            actor= "1203",
+            house = None,
+            wand = None,
+        ),
+        Character(
+            id = "1404",
+            name = "Dobby (the elf)",
+            appears_in = ["1301","1303","1304","1305","1306","1307",],
+            actor= "1204",
+            house = None,
+            wand = None,
         ),
     ]
 
