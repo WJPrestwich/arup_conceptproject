@@ -4,31 +4,13 @@ services:
     image: 'mongo'
     ports:
       - "27200:27200"
-    # volumes:
-    #   - '/home/docker/mongodb/harrypottertrivia:/bitnami'
-    # deploy:
-    #   placement:
-    #     constraints: [node.role == manager]
-    # networks:
-    #   - webnet
     command: mongod --port 27200 --bind_ip_all
   web:
     depends_on:
       - mongodb
     build: .
-    deploy:
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: "0.1"
-          memory: 100M
     ports:
       - "8082:8082"
-    command: ["./wait-for-it.sh", "mongodb:27200", "--", "python", "setup.py"]
+    command: ["./wait-for-it.sh", "mongodb:27200", "-s", "--", "python", "setup.py"]
     command: ["python", "server.py"]
     container_name: conceptproject
-    # networks:
-    #   - webnet
-networks:
-  webnet:
