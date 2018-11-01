@@ -11,6 +11,17 @@ services:
     build: .
     ports:
       - "8082:8082"
-    command: ["./wait-for-it.sh", "mongodb:27200", "-s", "--", "python", "setup.py"]
-    command: ["python", "server.py"]
+    # command: ["./wait-for-it.sh", "mongodb:27200", "-s", "--", "python", "setup.py", "&&", "python", "setup.py"]
+    # command: 
+    #   - ./wait-for-it.sh
+    #   - mongodb:27200
+    #   - -s
+    #   - --
+    #   - python
+    #   - setup.py
+    #   - 
+    #   - python
+    #   - setup.py
+    # command: ["python", "server.py"]
+    command: bash -c "./wait-for-it.sh mongodb:27200 -s -- python setup.py && python server.py"
     container_name: conceptproject
