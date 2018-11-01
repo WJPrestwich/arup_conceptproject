@@ -25,6 +25,8 @@ services:
           memory: 100M
     ports:
       - "8082:8082"
+    command: ["./wait-for-it.sh", "mongodb:27200", "--", "python", "setup.py"]
+    command: ["python", "server.py"]
     # networks:
     #   - webnet
 networks:

@@ -14,6 +14,5 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 EXPOSE 8080
 EXPOSE 27017
 
-# Setup the database and run server.py when the container launches
-CMD ["python", "setup.py"]
+# Run server.py when the container launches
 CMD ["python", "server.py"]

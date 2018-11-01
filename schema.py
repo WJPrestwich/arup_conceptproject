@@ -76,17 +76,19 @@ class Character(ObjectType):
 
 # ===== QUERY DEFINITION =====
 class Query(ObjectType):
-    wand = Field(Wand, id=ID(), wood=String(), core=String())
-    actor = Field(Actor, id=ID(), name=String())
-    movie = Field(Movie, id=ID(), title=String(), release_date=String())
+    wand = Field(Wand, id=ID(), wood=String(), core=String(), required=True)
+    actor = Field(Actor, id=ID(), name=String(), required=True)
+    movie = Field(Movie, id=ID(), title=String(), release_date=String(), required=True)
     character = Field(Character, 
         id=ID(), 
         name=String(), 
         actor=String(), 
         house=House(), 
         wand=String(),
+        required=True,
         )
-    character_appears_in = Field(List(Character), appears_in=ID(required=True))
+    character_appears_in = Field(List(Character), appears_in=ID(required=True), required=True)
+    all_characters = Field(List(Character), required=True)
 
     # We'll use a decorator here to cut down on similar code.
     def res_decorator(func):
@@ -117,8 +119,13 @@ class Query(ObjectType):
         return Character, db.characters, args, '1400'
 
     def resolve_character_appears_in(self, info, appears_in):
-        temp = db.characters.find({'appears_in': appears_in})
-        chars = [fill_out(Character, t) for t in temp]
+        result = db.characters.find({'appears_in': appears_in})
+        chars = [fill_out(Character, c) for c in result]
+        return chars
+
+    def resolve_all_characters(self, info):
+        result = db.characters.find({})
+        chars = [fill_out(Character, c) for c in result]
         return chars
     
 

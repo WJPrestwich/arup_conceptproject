@@ -35,6 +35,7 @@ type Query {
 	movie(id: ID, title: String(), releaseDate: String()): Movie!
 	character(id: ID, name: String(), actor: String(), house: House(), wand: String()): Character!
 	characterAppearsIn(appears_in: ID!): [Character]!
+	allCharacters(): [Character]!
 }
 
 type Mutation {
