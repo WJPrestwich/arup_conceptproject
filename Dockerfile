@@ -15,4 +15,4 @@ EXPOSE 8080
 EXPOSE 27017
 
 # Run server.py when the container launches
-CMD ["python", "server.py"]
+# CMD ["python", "server.py"]
