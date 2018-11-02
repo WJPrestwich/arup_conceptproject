@@ -8,7 +8,7 @@ Docker Compose must be installed to build from the included 'docker-compose.yml'
 
 ## Setup
 
-Clone this repo, then run `docker-compose up --build` as root or as a user who can execute docker-compose commands.
+Clone this repo, then in the project's directory run `docker-compose up --build` as root or as a user who can execute docker-compose commands.
 
 Wait until all required components are fetched and the server is running before continuing. This all should happen automagically, with a docker repository containing a mongo database downloaded and populated with dummy data. 
 
