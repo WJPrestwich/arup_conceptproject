@@ -3,12 +3,16 @@ from schema import Wand, Actor, Movie, Character
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://mongodb:27200")
-print(client.test_database, file=sys.stderr)
-client.drop_database('harry_potter_trivia')
-db = client.harry_potter_trivia
 
-def setup():
-    print("Initializing the database.", file=sys.stderr)
+
+def setup(quiet=False):
+    if not quiet:
+        print(client.test_database, file=sys.stderr)
+    client.drop_database('harry_potter_trivia')
+    db = client.harry_potter_trivia
+    
+    if not quiet:
+        print("Initializing the database.", file=sys.stderr)
     wands = [
         Wand(
             id = "1100",

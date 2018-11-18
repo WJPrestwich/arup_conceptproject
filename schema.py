@@ -143,7 +143,6 @@ class CreateCharacter(Mutation):
     def mutate(self, info, name, appears_in, actor, house=None, wand=None):
         # This character's id is equal to the last character's id plus one.
         last = db.characters.find_one(sort=[("id", -1)])
-        debug_print(last)
         _id = str(int(last['id'])+1)
 
         result = db.characters.insert_one({
